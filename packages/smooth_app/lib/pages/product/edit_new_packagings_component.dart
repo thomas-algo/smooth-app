@@ -76,6 +76,8 @@ class _EditNewPackagingsComponentState
               tagType: TagType.PACKAGING_RECYCLING,
               iconName: 'recycling',
               iconColor: iconColor,
+              minLengthForSuggestions: 0,
+              categories: widget.categories,
             ),
             _EditTextLine(
               title: appLocalizations.edit_packagings_element_field_quantity,

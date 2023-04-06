@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:openfoodfacts/openfoodfacts.dart';
 import 'package:smooth_app/generic_lib/design_constants.dart';
-import 'package:smooth_app/pages/product/autocomplete.dart';
 import 'package:smooth_app/query/product_query.dart';
+import 'package:flutter_svg/svg.dart';
 
 /// Simple input text field, with autocompletion.
 class SimpleInputTextField extends StatelessWidget {
@@ -92,17 +92,13 @@ class SimpleInputTextField extends StatelessWidget {
                   AutocompleteOnSelected<String> onSelected,
                   Iterable<String> options,
                 ) {
-                  final double screenHeight =
-                      MediaQuery.of(context).size.height;
-
-                  return AutocompleteOptions<String>(
-                    displayStringForOption:
-                        RawAutocomplete.defaultStringForOption,
-                    onSelected: onSelected,
+                  return AutocompleteOptionsWithIcon(
                     options: options,
-                    // Width = Row width - horizontal padding
-                    maxOptionsWidth: constraints.maxWidth - (LARGE_SPACE * 2),
-                    maxOptionsHeight: screenHeight / 3,
+                    onSelected: onSelected,
+                    fieldIcon: SvgPicture.network(
+                      'https://raw.githubusercontent.com/openfoodfacts/openfoodfacts-server/f2bf8d101835db4ef51049260465ec545adec374/html/images/lang/en/packaging/01-pet.73x90.svg',
+                      color: Theme.of(context).colorScheme.primary,
+                    ), // Color matches light/dark theme
                   );
                 },
               ),
@@ -136,6 +132,60 @@ class UnfocusWhenTapOutside extends StatelessWidget {
         }
       },
       child: child,
+    );
+  }
+}
+
+class AutocompleteOptionsWithIcon extends StatelessWidget {
+  const AutocompleteOptionsWithIcon(
+      {Key? key,
+      required this.options,
+      required this.onSelected,
+      this.fieldIcon})
+      : super(key: key);
+
+  final Iterable<String> options;
+  final AutocompleteOnSelected<String> onSelected;
+  final Widget? fieldIcon; // Widget used for an icon on the right.
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Material(
+        child: ConstrainedBox(
+          // BoxConstraints used to let the autocomplete shrink if the number of suggestions is small
+          constraints: BoxConstraints(
+              maxWidth: 0.75 * MediaQuery.of(context).size.width,
+              maxHeight: 0.4 * MediaQuery.of(context).size.height),
+
+          child: ListView.separated(
+            shrinkWrap:
+                true, // to let the autocomplete shrink if the number of suggestions is small
+            padding: EdgeInsets.zero,
+            itemBuilder: (BuildContext context, int index) {
+              final String option = options.elementAt(index);
+
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 5.0),
+                child: ListTile(
+                  visualDensity: const VisualDensity(vertical: -4),
+                  dense: false,
+                  title: Text(option),
+                  leading: fieldIcon,
+                  onTap: () {
+                    onSelected(option);
+                  },
+                ),
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) =>
+                const Divider(
+                    height: 0), // THe margin is defined above ListTile
+            itemCount: options.length,
+          ),
+        ),
+      ),
     );
   }
 }
